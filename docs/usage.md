@@ -72,7 +72,7 @@ platform-cli transfer import --from p --to c
 
 ```bash
 # Add validator (mainnet minimum: 2000 AVAX, 14 days)
-platform-cli validator add \
+platform-cli validator add-permissionless \
   --node-id NodeID-... \
   --bls-public-key <hex> \
   --bls-pop <hex> \
@@ -81,28 +81,44 @@ platform-cli validator add \
   --delegation-fee 0.02
 
 # Delegate to validator (mainnet minimum: 25 AVAX)
-platform-cli validator delegate \
+platform-cli validator add-permissionless-delegator \
   --node-id NodeID-... \
   --stake 100 \
   --duration 336h
 ```
+
+> **Breaking (v2.0.0):** command names now mirror the avalanchego transaction
+> they issue, and the old names were removed (no aliases):
+> `validator add` → `validator add-permissionless`,
+> `validator delegate` → `validator add-permissionless-delegator`,
+> `subnet convert-l1` → `subnet convert-to-l1`,
+> `l1 set-weight` → `l1 set-validator-weight`,
+> `l1 add-balance` → `l1 increase-validator-balance`.
 
 ### Subnets
 
 ```bash
 platform-cli subnet create
 platform-cli subnet transfer-ownership --subnet-id <ID> --new-owner <address>
-platform-cli subnet convert-l1 --subnet-id <ID> --chain-id <manager-chain-id> --validators <nodes> [--manager <hex>]
-platform-cli subnet convert-l1 --subnet-id <ID> --chain-id <manager-chain-id> --validators <nodes> [--contract-address <hex>]
-platform-cli subnet convert-l1 --subnet-id <ID> --chain-id <manager-chain-id> \
+platform-cli subnet convert-to-l1 --subnet-id <ID> --chain-id <manager-chain-id> --validators <nodes> [--manager <hex>]
+platform-cli subnet convert-to-l1 --subnet-id <ID> --chain-id <manager-chain-id> --validators <nodes> [--contract-address <hex>]
+platform-cli subnet convert-to-l1 --subnet-id <ID> --chain-id <manager-chain-id> \
   --validator-node-ids NodeID-...,NodeID-... \
   --validator-bls-public-keys <hex>,<hex> \
   --validator-bls-pops <hex>,<hex> \
   [--manager <hex>]
-platform-cli subnet convert-l1 --subnet-id <ID> --chain-id <manager-chain-id> --mock-validator
+platform-cli subnet convert-to-l1 --subnet-id <ID> --chain-id <manager-chain-id> --mock-validator
+platform-cli subnet add-validator --subnet-id <ID> --node-id NodeID-... --weight <uint> [--start <RFC3339|now>] [--duration <dur>]
 ```
 
-`convert-l1` notes:
+`add-validator` notes:
+- Adds a validator to a **permissioned** subnet (`AddSubnetValidatorTx`).
+- The node must already validate the primary network, and the validation period
+  must fall within its primary network validation window.
+- The subnet owner key authorizes the tx (subnet auth), so load the owner key via
+  `--key-name` or `--ledger`.
+
+`convert-to-l1` notes:
 - `--manager` / `--contract-address` is the validator manager contract address (hex).
 - `--chain-id` is the chain where the validator manager contract is deployed.
   In many setups, this is the same as the new L1 chain ID.
@@ -122,8 +138,8 @@ platform-cli subnet convert-l1 --subnet-id <ID> --chain-id <manager-chain-id> --
 
 ```bash
 platform-cli l1 register-validator --balance <AVAX> --pop <hex> --message <hex>   # balance > 0
-platform-cli l1 set-weight --message <hex>
-platform-cli l1 add-balance --validation-id <ID> --balance <AVAX>                  # balance > 0
+platform-cli l1 set-validator-weight --message <hex>
+platform-cli l1 increase-validator-balance --validation-id <ID> --balance <AVAX>   # balance > 0
 platform-cli l1 disable-validator --validation-id <ID>
 ```
 

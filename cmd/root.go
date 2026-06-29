@@ -39,11 +39,12 @@ var rootCmd = &cobra.Command{
 	Short:         "Avalanche P-Chain CLI",
 	SilenceErrors: true,
 	SilenceUsage:  true,
+	RunE:          requireSubcommand,
 	Long: `Avalanche P-Chain operations: staking, subnets, transfers, and L1 validators.
 
 Example usage:
   platform-cli wallet balance --key-name mykey
-  platform-cli validator add --node-id NodeID-... --stake 2000
+  platform-cli validator add-permissionless --node-id NodeID-... --stake 2000
   platform-cli transfer p-to-c --amount 10 --key-name mykey
   platform-cli subnet create --network fuji --key-name mykey
 
@@ -79,6 +80,16 @@ func init() {
 			fmt.Println("platform-cli " + version)
 		},
 	})
+}
+
+// requireSubcommand is the RunE for command groups: it prints help when the
+// group is invoked bare, and rejects any unknown subcommand with an error so
+// removed command names fail loudly instead of silently printing help.
+func requireSubcommand(cmd *cobra.Command, args []string) error {
+	if len(args) > 0 {
+		return fmt.Errorf("unknown command %q for %q", args[0], cmd.CommandPath())
+	}
+	return cmd.Help()
 }
 
 // avaxToNAVAX converts AVAX amount to nAVAX with validation.
