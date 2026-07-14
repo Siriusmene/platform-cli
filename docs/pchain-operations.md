@@ -11,6 +11,8 @@ use it to migrate existing scripts.
 | `ImportTx` | `transfer import` | `IssueImportTx` | — |
 | `AddPermissionlessValidatorTx` | `validator add-permissionless` | `IssueAddPermissionlessValidatorTx` | `validator add` |
 | `AddPermissionlessDelegatorTx` | `validator add-permissionless-delegator` | `IssueAddPermissionlessDelegatorTx` | `validator delegate` |
+| `AddAutoRenewedValidatorTx` | `validator add-auto-renewed` | `IssueAddAutoRenewedValidatorTx` | — |
+| `SetAutoRenewedValidatorConfigTx` | `validator set-auto-renewed-config` | `IssueSetAutoRenewedValidatorConfigTx` | — |
 | `CreateSubnetTx` | `subnet create` | `IssueCreateSubnetTx` | — |
 | `TransferSubnetOwnershipTx` | `subnet transfer-ownership` | `IssueTransferSubnetOwnershipTx` | — |
 | `ConvertSubnetToL1Tx` | `subnet convert-to-l1` | `IssueConvertSubnetToL1Tx` | `subnet convert-l1` |

@@ -85,6 +85,23 @@ platform-cli validator add-permissionless-delegator \
   --node-id NodeID-... \
   --stake 100 \
   --duration 336h
+
+# Add auto-renewed validator (ACP-236; re-stakes automatically each cycle)
+platform-cli validator add-auto-renewed \
+  --node-id NodeID-... \
+  --bls-public-key <hex> \
+  --bls-pop <hex> \
+  --stake 2000 \
+  --period 336h \
+  --delegation-fee 0.02 \
+  --auto-compound 1
+
+# Update an auto-renewed validator's next-cycle config (--period 0 exits after the current cycle)
+platform-cli validator set-auto-renewed-config \
+  --tx-id <AddAutoRenewedValidatorTx-ID> \
+  --node-id NodeID-... \
+  --period 336h \
+  --auto-compound 0.3
 ```
 
 > **Breaking (v2.0.0):** command names now mirror the avalanchego transaction
@@ -94,6 +111,20 @@ platform-cli validator add-permissionless-delegator \
 > `subnet convert-l1` → `subnet convert-to-l1`,
 > `l1 set-weight` → `l1 set-validator-weight`,
 > `l1 add-balance` → `l1 increase-validator-balance`.
+
+`add-auto-renewed` / `set-auto-renewed-config` notes (ACP-236):
+- An auto-renewed validator automatically re-stakes at the end of each cycle
+  instead of expiring, until you exit it.
+- `--period` is the per-cycle duration and must fall within the network's
+  min/max stake duration.
+- `--auto-compound` is the fraction of rewards restaked each cycle
+  (`1` = 100%, `0.3` = 30%).
+- BLS proof of possession comes from `--bls-public-key`/`--bls-pop` (manual,
+  recommended) or is auto-fetched via `--node-endpoint`.
+- `--owner-address` sets who may later update the config (default: your own
+  address); `set-auto-renewed-config` signs with that authority.
+- `set-auto-renewed-config` targets the original `--tx-id`; pass `--period 0`
+  to stop auto-renewing and exit gracefully after the current cycle.
 
 ### Subnets
 
